@@ -1452,7 +1452,7 @@ function endGame() {
   const today = dateInt().toString();
   const stats = getStats();
   if (mode === 'daily') {
-    if (true) {
+    if (stats.lastDate !== today) {
       stats.played++;
       if (pts > 0) {
         stats.streak++;
@@ -1603,6 +1603,13 @@ document.getElementById('startBtn').addEventListener('click', () => {
 });
 
 function startGame() {
+  // Daily lock — one game per day
+  const ds = getDailyState();
+  if (ds && ds.date === dateInt().toString()) {
+    showToast("You've already played today — come back tomorrow!", true);
+    return;
+  }
+
   let rand;
   if (mode === 'daily') {
     rand = seededRand(dateInt() + numLarge);
@@ -1660,6 +1667,14 @@ document.getElementById('statsBtn').addEventListener('click', () => {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 updateStatsUI(getStats());
+
+// Show today's result if already played
+const _ds = getDailyState();
+if (_ds && _ds.date === dateInt().toString()) {
+  const _pts = _ds.score;
+  const _labels = { 10: 'Exact!', 7: 'Close', 5: 'Near', 0: 'Missed' };
+  showToast(`Already played today — ${_labels[_pts] || ''} (${_pts}pts)`);
+}
 
 
 
