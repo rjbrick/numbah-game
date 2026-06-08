@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numbah</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+
+
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0e0e10;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --text: #f0f0f5;
+    --muted: #6b6b80;
+    --accent: #e8c84a;
+    --accent2: #4ae8a0;
+    --danger: #e84a6b;
+    --green: #4ae8a0;
+    --orange: #e8944a;
+    --red: #e84a6b;
+    --tile-size: 72px;
+  }
+
+  [data-theme="light"] {
+    --bg: #f5f5f0;
+    --surface: #ffffff;
+    --surface2: #ebebе4;
+    --border: #d0d0c8;
+    --text: #111118;
+    --muted: #888890;
+    --accent: #c8a020;
+    --surface2: #e8e8e0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.3s, color 0.3s;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 0;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .logo span {
+    color: var(--text);
+    opacity: 0.4;
+    font-size: 0.9rem;
+    display: block;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.2em;
+    font-weight: 300;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--accent); }
+
+
+  /* MAIN */
+  main {
+    width: 100%;
+    max-width: 600px;
+    padding: 16px 20px 80px;
+    flex: 1;
+  }
+
+  /* SETUP PHASE */
+  .setup-section {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .start-btn {
+    background: var(--accent);
+    color: #111;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .start-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,200,74,0.3); }
+  .start-btn:active { transform: translateY(0); }
+
+  /* GAME AREA */
+  .game-area { display: none; }
+  .game-area.active { display: block; }
+
+  /* TIMER */
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .target-display {
+    text-align: center;
+    flex: 1;
+  }
+
+  .target-label {
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .target-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .stopwatch {
+    flex-shrink: 0;
+    text-align: center;
+    min-width: 60px;
+  }
+  .stopwatch-label {
+    font-size: 0.6rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .stopwatch-time {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+  }
+
+  /* NUMBER TILES */
+  .tiles-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .number-tile {
+    width: var(--tile-size);
+    height: var(--tile-size);
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s;
+    position: relative;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .number-tile.orig-tile { border-color: var(--accent); color: var(--accent); }
+  .calc-row { margin-top: 4px; }
+  .number-tile.selected {
+    border-color: var(--accent2);
+    background: rgba(74,232,160,0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(74,232,160,0.25);
+  }
+  .number-tile.used {
+    opacity: 0.25;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .number-tile:not(.used):not(.selected):hover {
+    border-color: var(--muted);
+    transform: translateY(-2px);
+  }
+  .result-tile {
+    border-color: var(--accent2) !important;
+    background: rgba(74,232,160,0.06);
+    flex-direction: column;
+    gap: 2px;
+  }
+  .result-tile span:first-child { font-size: 1.4rem; line-height: 1; }
+  .result-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.08em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+  .number-tile.shake {
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  /* OPERATORS */
+  .ops-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .op-btn {
+    width: 52px; height: 52px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 1.4rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: all 0.18s;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .op-btn.selected {
+    border-color: var(--orange);
+    background: rgba(232,148,74,0.15);
+    color: var(--orange);
+    transform: translateY(-2px);
+  }
+  .op-btn:hover:not(.selected) { border-color: var(--muted); }
+
+  /* STEPS */
+  .steps-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    min-height: 80px;
+  }
+
+  .steps-label {
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .step-list { list-style: none; }
+
+  .step-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    animation: fadeIn 0.2s ease;
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-item .step-result { color: var(--accent2); font-weight: 500; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .empty-steps {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-family: 'DM Mono', monospace;
+    text-align: center;
+    padding: 12px 0;
+  }
+
+  /* ACTION BUTTONS */
+  .action-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.18s;
+  }
+  .action-btn:hover { border-color: var(--muted); }
+  .action-btn.primary {
+    background: var(--accent);
+    color: #111;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .action-btn.danger { border-color: var(--danger); color: var(--danger); }
+  .action-btn.danger:hover { background: rgba(232,74,107,0.1); }
+
+  /* PENDING STEP INDICATOR */
+  .pending-bar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pending-bar .pend-num { color: var(--accent2); }
+  .pending-bar .pend-op { color: var(--orange); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-60px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-family: 'DM Mono', monospace;
+    z-index: 1000;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: var(--danger); color: var(--danger); }
+
+  /* MODAL */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 440px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .modal-backdrop.open .modal { transform: none; }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .modal-title.win { color: var(--green); }
+  .modal-title.close { color: var(--orange); }
+  .modal-title.lose { color: var(--red); }
+
+  .modal-sub {
+    font-size: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .modal-score {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .score-card {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .score-card .sc-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .score-card .sc-label {
+    font-size: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+
+  .solution-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+
+  .solution-box .sol-label {
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .solution-steps { font-family: 'DM Mono', monospace; font-size: 0.85rem; line-height: 1.8; }
+  .solution-steps .sol-result { color: var(--accent2); }
+  .solution-steps .no-sol { color: var(--muted); font-style: italic; }
+
+  /* DISTRIBUTION CHART */
+  .dist-chart { margin-bottom: 20px; }
+  .dist-label {
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .dist-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .dist-key {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    width: 28px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .dist-bar-wrap { flex: 1; background: var(--bg); border-radius: 4px; height: 22px; overflow: hidden; }
+  .dist-bar {
+    height: 100%;
+    border-radius: 4px;
+    display: flex; align-items: center;
+    padding: 0 8px;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    transition: width 0.6s cubic-bezier(0.34,1.3,0.64,1);
+    min-width: 28px;
+  }
+
+  /* COUNTDOWN TIMER */
+  .next-puzzle {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .next-puzzle .np-label {
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .next-puzzle .np-time {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .modal-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* STATS BAR */
+  .stats-strip {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    padding: 8px 0 12px;
+  }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 10px;
+    text-align: center;
+    min-width: 54px;
+  }
+  .stat-pill .sp-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-pill .sp-key {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+
+  @media (max-width: 420px) {
+    :root { --tile-size: 58px; }
+    .target-number { font-size: 2.8rem; }
+    .number-tile { font-size: 1.3rem; }
+  }
+
+  /* SHARE CARD */
+  .share-card {
+    margin-bottom: 16px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .share-card-inner {
+    background: linear-gradient(135deg, #18181c 0%, #1e1e26 100%);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+  }
+
+  [data-theme="light"] .share-card-inner {
+    background: linear-gradient(135deg, #f0f0e8 0%, #e8e8dc 100%);
+  }
+
+  .share-game-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+
+  .share-puzzle-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    margin-bottom: 14px;
+  }
+
+  .share-emoji-row {
+    font-size: 2rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    line-height: 1;
+  }
+
+  .share-stats-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .share-stat {
+    text-align: center;
+  }
+
+  .share-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .share-stat-key {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .share-url {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    opacity: 0.6;
+  }
+
+  .modal-btns-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+
+  /* AUTH */
+  .auth-bar {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 6px 20px 0;
+    gap: 8px;
+  }
+
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px 4px 6px;
+    font-size: 0.78rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .user-pill:hover { border-color: var(--accent); }
+  .user-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #111;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    flex-shrink: 0;
+  }
+
+  .sign-in-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .sign-in-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* AUTH MODAL */
+  .auth-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .auth-modal-backdrop.open { opacity: 1; pointer-events: all; }
+
+  .auth-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    max-width: 360px;
+    width: 100%;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    text-align: center;
+  }
+  .auth-modal-backdrop.open .auth-modal { transform: none; }
+
+  .auth-modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .auth-modal-sub {
+    font-size: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .auth-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    outline: none;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .auth-input:focus { border-color: var(--accent); }
+  .auth-input::placeholder { color: var(--muted); }
+
+  .auth-submit-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #111;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+  }
+  .auth-submit-btn:hover { opacity: 0.9; }
+  .auth-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .auth-cancel-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .auth-cancel-btn:hover { color: var(--text); }
+
+  .auth-success-msg {
+    display: none;
+    text-align: center;
+    padding: 10px 0;
+  }
+  .auth-success-msg .check { font-size: 2rem; margin-bottom: 8px; }
+  .auth-success-msg p {
+    font-size: 0.85rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .auth-signout-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all 0.2s;
+    display: block;
+    width: 100%;
+  }
+  .auth-signout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  .sync-indicator {
+    font-size: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    text-align: center;
+    padding: 4px 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .sync-indicator.visible { opacity: 1; }
+
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="auth-bar" id="authBar"><button class="sign-in-btn" id="signInBtn">Sign in to save scores</button></div>
+<div class="sync-indicator" id="syncIndicator">✓ scores synced</div>
+
+<header>
+  <div class="logo">
+Numbah
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" id="themeBtn" title="Toggle theme">☀</button>
+    <button class="icon-btn" id="statsBtn" title="Stats">◎</button>
+  </div>
+</header>
+
+<div class="stats-strip" id="statsStrip">
+  <div class="stat-pill"><div class="sp-val" id="statPlayed">0</div><div class="sp-key">Played</div></div>
+  <div class="stat-pill"><div class="sp-val" id="statStreak">0</div><div class="sp-key">Streak</div></div>
+  <div class="stat-pill"><div class="sp-val" id="statBest">0</div><div class="sp-key">Best</div></div>
+  <div class="stat-pill"><div class="sp-val" id="statExact">0</div><div class="sp-key">Exact</div></div>
+</div>
+
+<main>
+  <!-- SETUP -->
+  <div id="setupPhase">
+    <div class="setup-section">
+      <button class="start-btn" id="startBtn">Play Today's Game</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="game-area" id="gameArea">
+    <div class="timer-wrap">
+      <div style="width:60px"></div>
+      <div class="target-display">
+        <div class="target-label">Target</div>
+        <div class="target-number" id="targetNum">—</div>
+      </div>
+      <div class="stopwatch">
+        <div class="stopwatch-label">Time</div>
+        <div class="stopwatch-time" id="stopwatchDisplay">0:00</div>
+      </div>
+    </div>
+
+    <div class="tiles-row" id="tilesRow"></div>
+    <div class="tiles-row calc-row" id="calcRow" style="display:none"></div>
+
+    <div class="pending-bar" id="pendingBar">
+      <span style="color:var(--muted); font-size:0.8rem;">← select a number to begin</span>
+    </div>
+
+    <div class="ops-row" id="opsRow">
+      <button class="op-btn" data-op="+">+</button>
+      <button class="op-btn" data-op="−">−</button>
+      <button class="op-btn" data-op="×">×</button>
+      <button class="op-btn" data-op="÷">÷</button>
+    </div>
+
+    <div class="steps-panel">
+      <div class="steps-label">Workings</div>
+      <div class="empty-steps" id="emptySteps">No steps yet</div>
+      <ul class="step-list" id="stepList"></ul>
+    </div>
+
+    <div class="action-row">
+      <button class="action-btn" id="undoBtn">↩ Undo</button>
+      <button class="action-btn" id="clearSelectionBtn" title="Clear current selection">✕ Clear</button>
+      <button class="action-btn danger" id="resetRoundBtn">Reset All</button>
+      <button class="action-btn primary" id="submitBtn">Submit</button>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">—</div>
+    <div class="modal-sub" id="modalSub">—</div>
+
+    <div class="modal-score" id="modalScore"></div>
+
+    <div class="solution-box">
+      <div class="sol-label">Solution</div>
+      <div class="solution-steps" id="solutionSteps"></div>
+    </div>
+
+    <div class="dist-chart">
+      <div class="dist-label">Score Distribution</div>
+      <div id="distChart"></div>
+    </div>
+
+    <div class="next-puzzle" id="nextPuzzleWrap">
+      <div class="np-label">Next Daily Puzzle</div>
+      <div class="np-time" id="nextPuzzleTimer">—</div>
+    </div>
+
+    <div class="modal-btns">
+      <div class="share-card" id="shareCard">
+        <div class="share-card-inner" id="shareCardInner">
+          <div class="share-game-name">Numbah</div>
+          <div class="share-puzzle-num" id="sharePuzzleNum">#—</div>
+          <div class="share-emoji-row" id="shareEmojiRow">—</div>
+          <div class="share-stats-row" id="shareStatsRow"></div>
+          <div class="share-url">numbah.game</div>
+        </div>
+      </div>
+      <div class="modal-btns-row">
+        <button class="action-btn primary" id="shareBtn">Copy & Share 📋</button>
+        <button class="action-btn" id="closeModalBtn">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function seededRand(seed) {
+  let s = seed;
+  return () => {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
+function dateInt() {
+  const d = new Date();
+  return d.getFullYear() * 10000 + (d.getMonth()+1) * 100 + d.getDate();
+}
+
+function daysSinceEpoch() {
+  const epoch = new Date('2026-06-09');
+  const now = new Date();
+  return Math.floor((now - epoch) / 86400000);
+}
+
+let toastTimer;
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = 'toast' + (isError ? ' error' : ''); }, 2200);
+}
+
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+function defaultStats() {
+  return {"played":0,"streak":0,"best":0,"exact":0,"dist":{"10":0,"7":0,"5":0,"0":0},"lastDate":null};
+}
+function getStats() {
+  try {
+    const raw = localStorage.getItem('numbah_stats');
+    if (!raw) return defaultStats();
+    const parsed = JSON.parse(raw);
+    // Validate shape — if corrupt, reset cleanly
+    if (typeof parsed.played !== 'number' || typeof parsed.streak !== 'number') return defaultStats();
+    return parsed;
+  } catch(e) {
+    console.warn('Stats corrupted, resetting', e);
+    return defaultStats();
+  }
+}
+function saveStats(s) { localStorage.setItem('numbah_stats', JSON.stringify(s)); syncScoresToSupabase(s); }
+
+function getDailyState() {
+  try {
+    return JSON.parse(localStorage.getItem('numbah_daily') || 'null');
+  } catch(e) {
+    return null;
+  }
+}
+function saveDailyState(s) { localStorage.setItem('numbah_daily', JSON.stringify(s)); }
+
+// ─── SOLVER ──────────────────────────────────────────────────────────────────
+function solve(numbers, target) {
+  let best = null;
+  let bestDiff = Infinity;
+
+  function tryAll(nums, steps) {
+    for (const n of nums) {
+      const diff = Math.abs(n.val - target);
+      if (diff < bestDiff) { bestDiff = diff; best = { val: n.val, steps: [...steps, ...n.steps] }; }
+      if (diff === 0) return;
+    }
+    if (nums.length < 2) return;
+    for (let i = 0; i < nums.length; i++) {
+      for (let j = 0; j < nums.length; j++) {
+        if (i === j) continue;
+        const a = nums[i], b = nums[j];
+        const rest = nums.filter((_,k) => k !== i && k !== j);
+        const candidates = [
+          { val: a.val + b.val, op: `${a.val} + ${b.val} = ${a.val+b.val}` },
+          { val: a.val - b.val, op: `${a.val} − ${b.val} = ${a.val-b.val}` },
+          { val: a.val * b.val, op: `${a.val} × ${b.val} = ${a.val*b.val}` },
+        ];
+        if (b.val !== 0 && a.val % b.val === 0) {
+          candidates.push({ val: a.val / b.val, op: `${a.val} ÷ ${b.val} = ${a.val/b.val}` });
+        }
+        for (const c of candidates) {
+          if (c.val <= 0) continue;
+          tryAll([...rest, { val: c.val, steps: [...a.steps, ...b.steps, c.op] }], steps);
+          if (bestDiff === 0) return;
+        }
+        if (bestDiff === 0) return;
+      }
+      if (bestDiff === 0) return;
+    }
+  }
+
+  const initial = numbers.map(n => ({ val: n, steps: [] }));
+  tryAll(initial, []);
+  return best;
+}
+
+// ─── GAME STATE ───────────────────────────────────────────────────────────────
+let mode = 'daily';
+let numLarge = 3;
+let numbers = [];
+let target = 0;
+let stopwatchVal = 0;
+let timerInterval = null;
+let gamePhase = 'setup'; // 'setup' | 'playing' | 'done'
+
+// Playing state
+let tiles = []; // { value, used, isLarge }
+let selectedTile = null; // index or null
+let selectedOp = null;
+let steps = []; // { a, op, b, result }
+let availableResults = []; // results fed back in as usable numbers
+let closestVal = null;
+
+function initGame(numbersArr, tgt) {
+  numbers = numbersArr;
+  target = tgt;
+  tiles = numbersArr.map((v, i) => ({ value: v, used: false, isLarge: i < numLarge }));
+  selectedTile = null;
+  selectedOp = null;
+  steps = [];
+  availableResults = [];
+  closestVal = null;
+  renderGame();
+}
+
+// ─── NUMBER GENERATION ────────────────────────────────────────────────────────
+const LARGE = [25, 50, 75, 100];
+
+function generateNumbers(rand) {
+  const large = [...LARGE];
+  const small = [];
+  for (let i = 1; i <= 10; i++) { small.push(i, i); }
+  shuffle(large, rand);
+  shuffle(small, rand);
+  const result = [];
+  for (let i = 0; i < numLarge; i++) result.push(large[i]);
+  for (let i = 0; i < 6 - numLarge; i++) result.push(small[i]);
+  return result;
+}
+
+function shuffle(arr, rand) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function generateTarget(rand) {
+  // Always 101-999, never below 101 (forces multi-step play)
+  return Math.floor(rand() * 899) + 101;
+}
+
+// ─── RENDER GAME ─────────────────────────────────────────────────────────────
+function getAllAvailableNumbers() {
+  // tiles not used + availableResults
+  const out = [];
+  tiles.forEach((t, i) => { if (!t.used) out.push({ idx: i, value: t.value, isResult: false, isLarge: t.isLarge }); });
+  availableResults.forEach((r, i) => { out.push({ idx: 'r' + i, value: r, isResult: true, isLarge: false }); });
+  return out;
+}
+
+function getCurrentTotal() {
+  if (steps.length === 0) return null;
+  return steps[steps.length - 1].result;
+}
+
+function renderGame() {
+  // Original tiles row
+  const row = document.getElementById('tilesRow');
+  row.innerHTML = '';
+  tiles.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.className = 'number-tile orig-tile' + (t.used ? ' used' : '') + (selectedTile === i ? ' selected' : '');
+    el.textContent = t.value;
+    el.dataset.idx = i;
+    if (!t.used) el.addEventListener('click', () => onTileClick(i));
+    row.appendChild(el);
+  });
+
+  // Calc tiles row - separate row, only shown when results exist
+  const calcRow = document.getElementById('calcRow');
+  calcRow.innerHTML = '';
+  if (availableResults.length > 0) {
+    calcRow.style.display = 'flex';
+    availableResults.forEach((v, i) => {
+      const el = document.createElement('div');
+      const key = 'r' + i;
+      el.className = 'number-tile result-tile' + (selectedTile === key ? ' selected' : '');
+      el.innerHTML = `<span>${v}</span><span class="result-tag">calc</span>`;
+      el.dataset.idx = key;
+      el.addEventListener('click', () => onTileClick(key));
+      calcRow.appendChild(el);
+    });
+  } else {
+    calcRow.style.display = 'none';
+  }
+
+  // Operators
+  document.querySelectorAll('.op-btn').forEach(btn => {
+    btn.className = 'op-btn' + (selectedOp === btn.dataset.op ? ' selected' : '');
+  });
+
+  // Pending bar
+  const pb = document.getElementById('pendingBar');
+  if (selectedTile !== null && selectedOp === null) {
+    const v = getTileValue(selectedTile);
+    pb.innerHTML = `<span class="pend-num">${v}</span> <span style="color:var(--muted)">— pick an operator</span>`;
+  } else if (selectedTile !== null && selectedOp !== null) {
+    const v = getTileValue(selectedTile);
+    pb.innerHTML = `<span class="pend-num">${v}</span> <span class="pend-op">${selectedOp}</span> <span style="color:var(--muted)">— pick second number</span>`;
+  } else {
+    pb.innerHTML = `<span style="color:var(--muted); font-size:0.8rem;">← select a number to begin</span>`;
+  }
+
+  // Steps
+  const sl = document.getElementById('stepList');
+  const empty = document.getElementById('emptySteps');
+  sl.innerHTML = '';
+  if (steps.length === 0) {
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    steps.forEach(s => {
+      const li = document.createElement('li');
+      li.className = 'step-item';
+      li.innerHTML = `<span>${s.a} ${s.op} ${s.b}</span><span class="step-result">= ${s.result}</span>`;
+      sl.appendChild(li);
+    });
+  }
+
+  // Track closest across ALL available numbers — originals and calc results
+  const allVals = [
+    ...tiles.filter(t => !t.used).map(t => t.value),
+    ...availableResults
+  ];
+  allVals.forEach(v => {
+    if (closestVal === null || Math.abs(v - target) < Math.abs(closestVal - target)) {
+      closestVal = v;
+    }
+  });
+}
+
+function getTileValue(idx) {
+  if (String(idx).startsWith('r')) return availableResults[parseInt(idx.slice(1))];
+  return tiles[idx].value;
+}
+
+function markTileUsed(idx) {
+  if (String(idx).startsWith('r')) {
+    availableResults.splice(parseInt(idx.slice(1)), 1);
+  } else {
+    tiles[idx].used = true;
+  }
+}
+
+// ─── INTERACTION ─────────────────────────────────────────────────────────────
+function onTileClick(idx) {
+  if (gamePhase !== 'playing') return;
+
+  if (selectedTile === null) {
+    // First number
+    selectedTile = idx;
+    renderGame();
+    return;
+  }
+
+  if (selectedOp === null) {
+    // Clicked another tile before op — switch selection
+    selectedTile = idx;
+    renderGame();
+    return;
+  }
+
+  // Second number selected — execute step
+  if (idx === selectedTile) {
+    showToast("Can't use same tile twice", true);
+    shakeTile(idx);
+    return;
+  }
+
+  const a = getTileValue(selectedTile);
+  const b = getTileValue(idx);
+
+  // Validate op is one of the four known operators
+  const validOps = ['+', '−', '×', '÷'];
+  if (!validOps.includes(selectedOp)) {
+    showToast("Select an operator first", true);
+    selectedOp = null;
+    renderGame();
+    return;
+  }
+
+  let result;
+  if (selectedOp === '+') result = a + b;
+  else if (selectedOp === '−') result = a - b;
+  else if (selectedOp === '×') result = a * b;
+  else if (selectedOp === '÷') {
+    if (b === 0 || a % b !== 0) {
+      showToast("Can't divide — not a whole number", true);
+      shakeTile(idx);
+      return;
+    }
+    result = a / b;
+  }
+
+  // Final safety net — should never be undefined or non-finite
+  if (result === undefined || !isFinite(result) || isNaN(result)) {
+    showToast("Invalid operation", true);
+    selectedOp = null;
+    renderGame();
+    return;
+  }
+
+  if (result <= 0) {
+    showToast("Result must be positive", true);
+    shakeTile(idx);
+    return;
+  }
+
+  // Ensure result is a whole number (catches any floating point edge cases)
+  if (!Number.isInteger(result)) {
+    showToast("Result must be a whole number", true);
+    shakeTile(idx);
+    return;
+  }
+
+  steps.push({ a, op: selectedOp, b, result, usedA: selectedTile, usedB: idx });
+  markTileUsed(selectedTile);
+  markTileUsed(idx);
+  // Result auto-appears as a new tile
+  availableResults.push(result);
+
+  selectedTile = null;
+  selectedOp = null;
+  renderGame();
+
+  if (result === target) {
+    showToast("🎯 Exact match!", false);
+    gamePhase = 'done'; // Lock immediately to prevent double-submit
+    setTimeout(() => {
+      if (gamePhase === 'done') endGame();
+    }, 800);
+  }
+}
+
+function shakeTile(idx) {
+  const tiles = document.querySelectorAll('.number-tile');
+  tiles.forEach(t => { if (t.dataset.idx == idx) { t.classList.add('shake'); setTimeout(() => t.classList.remove('shake'), 500); } });
+}
+
+let opDebounce = false;
+document.getElementById('opsRow').addEventListener('click', e => {
+  const btn = e.target.closest('.op-btn');
+  if (!btn) return;
+  if (gamePhase !== 'playing') return;
+  if (opDebounce) return;
+  opDebounce = true;
+  setTimeout(() => { opDebounce = false; }, 150);
+  selectedOp = selectedOp === btn.dataset.op ? null : btn.dataset.op;
+  renderGame();
+});
+
+document.getElementById('undoBtn').addEventListener('click', () => {
+  if (gamePhase !== 'playing') return;
+  if (steps.length === 0) { showToast("Nothing to undo", true); return; }
+  steps.pop();
+  // Fully rebuild state from remaining steps - safest approach, no index drift
+  rebuildStateFromSteps();
+  selectedTile = null;
+  selectedOp = null;
+  renderGame();
+});
+
+function rebuildStateFromSteps() {
+  // Reset all original tiles to unused
+  tiles.forEach(t => t.used = false);
+  availableResults = [];
+  // Replay each remaining step
+  for (const step of steps) {
+    // Mark original tiles used
+    if (!String(step.usedA).startsWith('r')) tiles[step.usedA].used = true;
+    if (!String(step.usedB).startsWith('r')) tiles[step.usedB].used = true;
+    // Re-push the result (calc tiles are just the results array in order)
+    availableResults.push(step.result);
+  }
+  // Rebuild usedA/usedB references for calc tiles based on replay order
+  // (calc tile indices may shift; re-index them)
+  let calcIdx = 0;
+  for (const step of steps) {
+    if (String(step.usedA).startsWith('r')) calcIdx++;
+    if (String(step.usedB).startsWith('r')) calcIdx++;
+  }
+}
+
+document.getElementById('clearSelectionBtn').addEventListener('click', () => {
+  if (gamePhase !== 'playing') return;
+  selectedTile = null;
+  selectedOp = null;
+  renderGame();
+  showToast('Selection cleared');
+});
+
+document.getElementById('resetRoundBtn').addEventListener('click', () => {
+  if (gamePhase !== 'playing') return;
+  steps = [];
+  tiles.forEach(t => t.used = false);
+  availableResults = [];
+  const cr = document.getElementById('calcRow'); if(cr) { cr.innerHTML=''; cr.style.display='none'; }
+  selectedTile = null;
+  selectedOp = null;
+  closestVal = null;
+  renderGame();
+});
+
+let submitDebounce = false;
+document.getElementById('submitBtn').addEventListener('click', () => {
+  if (gamePhase !== 'playing') return;
+  if (submitDebounce) return;
+  submitDebounce = true;
+  setTimeout(() => { submitDebounce = false; }, 1000);
+  endGame();
+});
+
+// ─── STOPWATCH ───────────────────────────────────────────────────────────────
+function startTimer() {
+  stopwatchVal = 0;
+  updateStopwatchUI();
+  timerInterval = setInterval(() => {
+    stopwatchVal++;
+    updateStopwatchUI();
+  }, 1000);
+}
+
+function updateStopwatchUI() {
+  const el = document.getElementById('stopwatchDisplay');
+  const m = Math.floor(stopwatchVal / 60);
+  const s = (stopwatchVal % 60).toString().padStart(2, '0');
+  el.textContent = m + ':' + s;
+}
+
+// ─── END GAME ─────────────────────────────────────────────────────────────────
+function endGame() {
+  // Must have made at least one calculation
+  if (steps.length === 0 && gamePhase === 'playing') {
+    showToast("Make at least one calculation first", true);
+    // Shake all tiles to hint
+    document.querySelectorAll('.number-tile').forEach(el => {
+      el.classList.add('shake');
+      setTimeout(() => el.classList.remove('shake'), 500);
+    });
+    return;
+  }
+
+  clearInterval(timerInterval);
+  gamePhase = 'done';
+
+  // Best value achieved
+  const ct = getCurrentTotal();
+  if (ct !== null && (closestVal === null || Math.abs(ct - target) < Math.abs(closestVal - target))) closestVal = ct;
+  const finalVal = closestVal || 0;
+  const diff = Math.abs(finalVal - target);
+
+  let pts;
+  if (diff === 0) pts = 10;
+  else if (diff <= 5) pts = 7;
+  else if (diff <= 10) pts = 5;
+  else pts = 0;
+
+  // Run solver
+  const solution = solve(numbers, target);
+
+  // Update stats
+  const today = dateInt().toString();
+  const stats = getStats();
+  if (mode === 'daily') {
+    if (true) {
+      stats.played++;
+      if (pts > 0) {
+        stats.streak++;
+        if (stats.streak > stats.best) stats.best = stats.streak;
+      } else {
+        stats.streak = 0;
+      }
+      if (pts === 10) stats.exact++;
+      stats.dist[pts.toString()] = (stats.dist[pts.toString()] || 0) + 1;
+      stats.lastDate = today;
+      saveStats(stats);
+      saveDailyState({ date: today, score: pts, closest: finalVal });
+    }
+  }
+  updateStatsUI(stats);
+
+  // Show modal
+  showResultModal(pts, diff, finalVal, solution, stats);
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function showResultModal(pts, diff, finalVal, solution, stats) {
+  const titles = { 10: ['EXACT!', 'win'], 7: ['CLOSE!', 'close'], 5: ['NEAR', 'close'], 0: ['MISSED', 'lose'] };
+  const [titleText, cls] = titles[pts];
+
+  document.getElementById('modalTitle').textContent = titleText;
+  document.getElementById('modalTitle').className = 'modal-title ' + cls;
+
+  let sub = pts === 10 ? 'Perfect score — exactly on target' : `You got ${finalVal} — ${diff} away from ${target}`;
+  if (pts === 0 && diff > 10) sub = `You got ${finalVal || '—'} — too far from ${target}`;
+  document.getElementById('modalSub').textContent = sub;
+
+  // Score cards
+  document.getElementById('modalScore').innerHTML = `
+    <div class="score-card"><div class="sc-val">${pts}</div><div class="sc-label">Points</div></div>
+    <div class="score-card"><div class="sc-val">${finalVal || '—'}</div><div class="sc-label">Closest</div></div>
+    <div class="score-card"><div class="sc-val">${stats.streak}</div><div class="sc-label">Streak</div></div>
+  `;
+
+  // Solution
+  const solSteps = document.getElementById('solutionSteps');
+  if (solution && solution.steps.length > 0) {
+    solSteps.innerHTML = solution.steps.map(s => {
+      const parts = s.split('=');
+      return `${parts[0]}= <span class="sol-result">${parts[1]}</span>`;
+    }).join('<br>');
+  } else if (solution && solution.steps.length === 0) {
+    solSteps.innerHTML = `<span class="no-sol">Target is achievable directly (${target} is in the numbers)</span>`;
+  } else {
+    solSteps.innerHTML = `<span class="no-sol">Closest achievable: ${solution ? solution.val : '—'}</span>`;
+  }
+
+  // Distribution
+  const distEl = document.getElementById('distChart');
+  const maxVal = Math.max(1, ...Object.values(stats.dist));
+  const labels = { '10': 'Exact (10)', '7': 'Close (7)', '5': 'Near (5)', '0': 'Miss (0)' };
+  const colors = { '10': 'var(--green)', '7': 'var(--accent)', '5': 'var(--orange)', '0': 'var(--red)' };
+  distEl.innerHTML = ['10','7','5','0'].map(k => {
+    const v = stats.dist[k] || 0;
+    const pct = Math.max(4, (v / maxVal) * 100);
+    return `<div class="dist-row">
+      <div class="dist-key">${k}pts</div>
+      <div class="dist-bar-wrap"><div class="dist-bar" style="width:${pct}%;background:${colors[k]};color:#111">${v}</div></div>
+    </div>`;
+  }).join('');
+
+  // Next puzzle countdown
+  const npWrap = document.getElementById('nextPuzzleWrap');
+  npWrap.style.display = 'block';
+  startNextPuzzleCountdown();
+
+  document.getElementById('modalBackdrop').classList.add('open');
+
+  // Build share card
+  const scoreEmoji = { 10: '🎯', 7: '⭐', 5: '🔶', 0: '❌' };
+  const streakEmoji = pts > 0 && stats.streak >= 3 ? ' 🔥' : '';
+  const puzzleNum = daysSinceEpoch();
+  const mm = Math.floor(stopwatchVal/60), ss = (stopwatchVal%60).toString().padStart(2,'0');
+  const timeStr = mm + ':' + ss;
+
+  // Emoji row: result icon + score blocks
+  const scoreBlocks = { 10: '🟩', 7: '🟨', 5: '🟧', 0: '🟥' };
+  const emojiLine = scoreEmoji[pts] + ' ' + scoreBlocks[pts].repeat(pts === 10 ? 5 : pts === 7 ? 4 : pts === 5 ? 3 : 1);
+
+  document.getElementById('sharePuzzleNum').textContent = '#' + puzzleNum;
+  document.getElementById('shareEmojiRow').textContent = emojiLine;
+  document.getElementById('shareStatsRow').innerHTML = `
+    <div class="share-stat"><div class="share-stat-val">${pts}</div><div class="share-stat-key">pts</div></div>
+    <div class="share-stat"><div class="share-stat-val">${finalVal || '—'}</div><div class="share-stat-key">closest</div></div>
+    <div class="share-stat"><div class="share-stat-val">${timeStr}</div><div class="share-stat-key">time</div></div>
+    <div class="share-stat"><div class="share-stat-val">${stats.streak}${streakEmoji}</div><div class="share-stat-key">streak</div></div>
+  `;
+
+  const shareText = [
+    `Numbah #${puzzleNum} ${scoreEmoji[pts]}`,
+    `Target: ${target}  |  Got: ${finalVal || '—'}  |  ⏱ ${timeStr}`,
+    emojiLine,
+    `🔥 Streak: ${stats.streak}`,
+    `numbah.game`
+  ].join('\n');
+
+  document.getElementById('shareBtn').onclick = () => {
+    if (navigator.share) {
+      navigator.share({ title: 'Numbah #' + puzzleNum, text: shareText })
+        .catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareText)
+        .then(() => showToast('Copied to clipboard!'))
+        .catch(() => showToast('Copy failed', true));
+    }
+  };
+
+  document.getElementById('closeModalBtn').onclick = () => {
+    document.getElementById('modalBackdrop').classList.remove('open');
+  };
+}
+
+let nextCountdownInterval;
+function startNextPuzzleCountdown() {
+  clearInterval(nextCountdownInterval);
+  const el = document.getElementById('nextPuzzleTimer');
+  function update() {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate()+1);
+    tomorrow.setHours(0,0,0,0);
+    const diff = tomorrow - now;
+    const h = Math.floor(diff/3600000).toString().padStart(2,'0');
+    const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+    const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
+    el.textContent = `${h}:${m}:${s}`;
+  }
+  update();
+  nextCountdownInterval = setInterval(update, 1000);
+}
+
+// ─── STATS UI ─────────────────────────────────────────────────────────────────
+function updateStatsUI(stats) {
+  document.getElementById('statPlayed').textContent = stats.played;
+  document.getElementById('statStreak').textContent = stats.streak;
+  document.getElementById('statBest').textContent = stats.best;
+  document.getElementById('statExact').textContent = stats.exact;
+}
+
+// ─── SETUP FLOW ───────────────────────────────────────────────────────────────
+document.getElementById('startBtn').addEventListener('click', () => {
+  startGame();
+});
+
+function startGame() {
+  let rand;
+  if (mode === 'daily') {
+    rand = seededRand(dateInt() + numLarge);
+  } else {
+    rand = seededRand(Math.floor(Math.random() * 1e9));
+  }
+  const nums = generateNumbers(rand);
+  const tgt = generateTarget(rand);
+
+  document.getElementById('setupPhase').style.display = 'none';
+  document.getElementById('gameArea').classList.add('active');
+
+  document.getElementById('targetNum').textContent = tgt;
+  gamePhase = 'playing';
+  initGame(nums, tgt);
+  startTimer();
+}
+
+function resetToSetup() {
+  clearInterval(timerInterval);
+  gamePhase = 'setup';
+  document.getElementById('setupPhase').style.display = 'block';
+  document.getElementById('gameArea').classList.remove('active');
+  updateStatsUI(getStats());
+}
+
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
+let lightMode = localStorage.getItem('numbah_theme') === 'light';
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', lightMode ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = lightMode ? '☽' : '☀';
+  localStorage.setItem('numbah_theme', lightMode ? 'light' : 'dark');
+}
+document.getElementById('themeBtn').addEventListener('click', () => { lightMode = !lightMode; applyTheme(); });
+applyTheme();
+
+// ─── STATS BTN ────────────────────────────────────────────────────────────────
+document.getElementById('statsBtn').addEventListener('click', () => {
+  const stats = getStats();
+  showResultModal(0, 999, 0, null, stats);
+  document.getElementById('modalTitle').textContent = 'STATS';
+  document.getElementById('modalTitle').className = 'modal-title';
+  document.getElementById('modalSub').textContent = 'Your Numbah history';
+  document.getElementById('modalScore').innerHTML = `
+    <div class="score-card"><div class="sc-val">${stats.played}</div><div class="sc-label">Played</div></div>
+    <div class="score-card"><div class="sc-val">${stats.streak}</div><div class="sc-label">Streak</div></div>
+    <div class="score-card"><div class="sc-val">${stats.best}</div><div class="sc-label">Best</div></div>
+  `;
+  document.getElementById('solutionSteps').innerHTML = '';
+  document.querySelector('.solution-box').style.display = 'none';
+  document.getElementById('shareBtn').style.display = 'none';
+  document.getElementById('shareCard').style.display = 'none';
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+updateStatsUI(getStats());
+
+
+
+// ─── SUPABASE ─────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://bjbwmibjezdhwstwvwnv.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqYndtaWJqZXpkaHdzdHd2d252Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MjMyMDIsImV4cCI6MjA5NjQ5OTIwMn0.AcKFmRtFg3NM3Ghhn1OavAip0sAIeUDTNoBNWhHBRfo';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let currentUser = null;
+
+async function syncScoresToSupabase(stats) {
+  if (!currentUser) return;
+  try {
+    await sb.from('numbah_scores').upsert({
+      user_id: currentUser.id,
+      played: stats.played,
+      streak: stats.streak,
+      best_streak: stats.best,
+      exact_count: stats.exact,
+      dist: stats.dist,
+      last_date: stats.lastDate,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    const ind = document.getElementById('syncIndicator');
+    ind.classList.add('visible');
+    setTimeout(() => ind.classList.remove('visible'), 2000);
+  } catch(e) { console.error('Sync error', e); }
+}
+
+async function loadScoresFromSupabase() {
+  if (!currentUser) return;
+  try {
+    const { data } = await sb.from('numbah_scores').select('*').eq('user_id', currentUser.id).single();
+    if (data) {
+      const stats = {
+        played: data.played || 0,
+        streak: data.streak || 0,
+        best: data.best_streak || 0,
+        exact: data.exact_count || 0,
+        dist: data.dist || {"10":0,"7":0,"5":0,"0":0},
+        lastDate: data.last_date || null
+      };
+      localStorage.setItem('numbah_stats', JSON.stringify(stats));
+      updateStatsUI(stats);
+      showToast('Scores loaded ✓');
+    }
+  } catch(e) { console.error('Load error', e); }
+}
+
+function updateAuthUI(user) {
+  const bar = document.getElementById('authBar');
+  if (user) {
+    const initials = user.email.slice(0,2).toUpperCase();
+    bar.innerHTML = `<div class="user-pill" id="userPill"><div class="user-avatar">${initials}</div><span>${user.email}</span></div>`;
+  } else {
+    bar.innerHTML = `<button class="sign-in-btn" id="signInBtn">Sign in to save scores</button>`;
+  }
+}
+
+// Use delegation on authBar so it works regardless of innerHTML rewrites
+document.getElementById('authBar').addEventListener('click', openAuthModal);
+
+function openAuthModal() {
+  const backdrop = document.getElementById('authModalBackdrop');
+  backdrop.classList.add('open');
+  if (currentUser) {
+    document.getElementById('authFormView').style.display = 'none';
+    document.getElementById('authSuccessMsg').style.display = 'none';
+    document.getElementById('authSignedInView').style.display = 'block';
+    document.getElementById('authSignedInEmail').textContent = currentUser.email;
+  } else {
+    document.getElementById('authFormView').style.display = 'block';
+    document.getElementById('authSuccessMsg').style.display = 'none';
+    document.getElementById('authSignedInView').style.display = 'none';
+    document.getElementById('authEmailInput').value = '';
+  }
+}
+
+function closeAuthModal() {
+  document.getElementById('authModalBackdrop').classList.remove('open');
+}
+
+document.getElementById('authSubmitBtn').addEventListener('click', async () => {
+  const email = document.getElementById('authEmailInput').value.trim();
+  if (!email || !email.includes('@')) { showToast('Enter a valid email', true); return; }
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href }
+  });
+  btn.disabled = false;
+  btn.textContent = 'Send Magic Link';
+  if (error) { showToast('Error: ' + error.message, true); return; }
+  document.getElementById('authFormView').style.display = 'none';
+  document.getElementById('authSuccessMsg').style.display = 'block';
+});
+
+document.getElementById('authCancelBtn').addEventListener('click', closeAuthModal);
+document.getElementById('authSuccessCloseBtn').addEventListener('click', closeAuthModal);
+document.getElementById('authSignedInCloseBtn').addEventListener('click', closeAuthModal);
+
+document.getElementById('authModalBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('authModalBackdrop')) closeAuthModal();
+});
+
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  currentUser = null;
+  updateAuthUI(null);
+  closeAuthModal();
+  showToast('Signed out');
+});
+
+// Listen for auth state changes (including magic link callback)
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    updateAuthUI(currentUser);
+    await loadScoresFromSupabase();
+    closeAuthModal();
+    if (event === 'SIGNED_IN') showToast('Signed in as ' + currentUser.email);
+  } else {
+    currentUser = null;
+    updateAuthUI(null);
+  }
+});
+
+// Check existing session on load
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session?.user) {
+    currentUser = session.user;
+    updateAuthUI(currentUser);
+    loadScoresFromSupabase();
+  }
+});
+
+</script>
+
+<!-- AUTH MODAL -->
+<div class="auth-modal-backdrop" id="authModalBackdrop">
+  <div class="auth-modal">
+    <div id="authFormView">
+      <div class="auth-modal-title">Save Your Scores</div>
+      <div class="auth-modal-sub">Enter your email — we'll send you a magic link.<br>No password needed.</div>
+      <input class="auth-input" type="email" id="authEmailInput" placeholder="your@email.com" autocomplete="email"/>
+      <button class="auth-submit-btn" id="authSubmitBtn">Send Magic Link</button>
+      <button class="auth-cancel-btn" id="authCancelBtn">Cancel</button>
+    </div>
+    <div class="auth-success-msg" id="authSuccessMsg">
+      <div class="check">📬</div>
+      <p>Magic link sent!<br>Check your email and tap the link to sign in.<br><br>Your scores will sync automatically.</p>
+      <button class="auth-cancel-btn" id="authSuccessCloseBtn">Close</button>
+    </div>
+    <div id="authSignedInView" style="display:none">
+      <div class="auth-modal-title">Account</div>
+      <div class="auth-modal-sub" id="authSignedInEmail">—</div>
+      <div style="font-size:0.75rem;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:8px;">Your scores are synced across devices.</div>
+      <button class="auth-signout-btn" id="signOutBtn">Sign out</button>
+      <button class="auth-cancel-btn" id="authSignedInCloseBtn" style="margin-top:8px;">Close</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
