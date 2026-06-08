@@ -1935,27 +1935,6 @@ sb.auth.getSession().then(({ data: { session } }) => {
 });
 
 
-// ─── HOW TO PLAY ─────────────────────────────────────────────────────────────
-function openHelpModal() {
-  document.getElementById('helpModalBackdrop').classList.add('open');
-}
-function closeHelpModal() {
-  document.getElementById('helpModalBackdrop').classList.remove('open');
-}
-
-document.getElementById('helpBtn').addEventListener('click', openHelpModal);
-document.getElementById('helpCloseBtn').addEventListener('click', closeHelpModal);
-document.getElementById('helpPlayBtn').addEventListener('click', closeHelpModal);
-document.getElementById('helpModalBackdrop').addEventListener('click', e => {
-  if (e.target === document.getElementById('helpModalBackdrop')) closeHelpModal();
-});
-
-// Show help on very first visit
-if (!localStorage.getItem('numbah_seen_help')) {
-  setTimeout(openHelpModal, 400);
-  localStorage.setItem('numbah_seen_help', '1');
-}
-
 </script>
 
 <!-- AUTH MODAL -->
@@ -2057,5 +2036,27 @@ if (!localStorage.getItem('numbah_seen_help')) {
   </div>
 </div>
 
+<script>
+// ─── HOW TO PLAY ─────────────────────────────────────────────────────────────
+function openHelpModal() {
+  document.getElementById('helpModalBackdrop').classList.add('open');
+}
+function closeHelpModal() {
+  document.getElementById('helpModalBackdrop').classList.remove('open');
+}
+
+document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+document.getElementById('helpCloseBtn').addEventListener('click', closeHelpModal);
+document.getElementById('helpPlayBtn').addEventListener('click', closeHelpModal);
+document.getElementById('helpModalBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('helpModalBackdrop')) closeHelpModal();
+});
+
+// Show help on very first visit
+if (!localStorage.getItem('numbah_seen_help')) {
+  setTimeout(openHelpModal, 400);
+  localStorage.setItem('numbah_seen_help', '1');
+}
+</script>
 </body>
 </html>
