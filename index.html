@@ -7,6 +7,28 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 
 
+
+// ─── HOW TO PLAY ─────────────────────────────────────────────────────────────
+function openHelpModal() {
+  document.getElementById('helpModalBackdrop').classList.add('open');
+}
+function closeHelpModal() {
+  document.getElementById('helpModalBackdrop').classList.remove('open');
+}
+
+document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+document.getElementById('helpCloseBtn').addEventListener('click', closeHelpModal);
+document.getElementById('helpPlayBtn').addEventListener('click', closeHelpModal);
+document.getElementById('helpModalBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('helpModalBackdrop')) closeHelpModal();
+});
+
+// Show help on very first visit
+if (!localStorage.getItem('numbah_seen_help')) {
+  setTimeout(openHelpModal, 400);
+  localStorage.setItem('numbah_seen_help', '1');
+}
+
 </script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -856,6 +878,124 @@
   }
   .sync-indicator.visible { opacity: 1; }
 
+
+  /* HOW TO PLAY */
+  .help-goal {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .help-target-demo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    flex-shrink: 0;
+  }
+  .help-target-label {
+    font-size: 0.6rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .help-target-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .help-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .help-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+  .help-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .help-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .help-step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #111;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .help-step-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .help-step-text strong {
+    font-size: 0.88rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .help-step-text span {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .help-rules {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .help-rule {
+    font-size: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .help-scoring {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .help-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .help-score-badge {
+    font-size: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .help-score-badge.exact { background: rgba(74,232,160,0.15); color: var(--green); }
+  .help-score-badge.close { background: rgba(232,200,74,0.15); color: var(--accent); }
+  .help-score-badge.near  { background: rgba(232,148,74,0.15); color: var(--orange); }
+  .help-score-badge.miss  { background: rgba(232,74,107,0.12); color: var(--red); }
+  .help-score-pts {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+
 </style>
 </head>
 <body>
@@ -870,6 +1010,7 @@
 Numbah
   </div>
   <div class="header-actions">
+    <button class="icon-btn" id="helpBtn" title="How to play">?</button>
     <button class="icon-btn" id="themeBtn" title="Toggle theme">☀</button>
     <button class="icon-btn" id="statsBtn" title="Stats">◎</button>
   </div>
@@ -1813,6 +1954,28 @@ sb.auth.getSession().then(({ data: { session } }) => {
   }
 });
 
+
+// ─── HOW TO PLAY ─────────────────────────────────────────────────────────────
+function openHelpModal() {
+  document.getElementById('helpModalBackdrop').classList.add('open');
+}
+function closeHelpModal() {
+  document.getElementById('helpModalBackdrop').classList.remove('open');
+}
+
+document.getElementById('helpBtn').addEventListener('click', openHelpModal);
+document.getElementById('helpCloseBtn').addEventListener('click', closeHelpModal);
+document.getElementById('helpPlayBtn').addEventListener('click', closeHelpModal);
+document.getElementById('helpModalBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('helpModalBackdrop')) closeHelpModal();
+});
+
+// Show help on very first visit
+if (!localStorage.getItem('numbah_seen_help')) {
+  setTimeout(openHelpModal, 400);
+  localStorage.setItem('numbah_seen_help', '1');
+}
+
 </script>
 
 <!-- AUTH MODAL -->
@@ -1837,6 +2000,80 @@ sb.auth.getSession().then(({ data: { session } }) => {
       <button class="auth-signout-btn" id="signOutBtn">Sign out</button>
       <button class="auth-cancel-btn" id="authSignedInCloseBtn" style="margin-top:8px;">Close</button>
     </div>
+  </div>
+</div>
+
+
+<!-- HOW TO PLAY MODAL -->
+<div class="auth-modal-backdrop" id="helpModalBackdrop">
+  <div class="auth-modal" style="max-width:420px; text-align:left;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+      <div class="auth-modal-title" style="margin-bottom:0;">How to Play</div>
+      <button class="auth-cancel-btn" id="helpCloseBtn" style="font-size:1.2rem; padding:0 4px;">✕</button>
+    </div>
+
+    <div class="help-goal">
+      <div class="help-target-demo">
+        <span class="help-target-label">Target</span>
+        <span class="help-target-num">438</span>
+      </div>
+      <p class="help-desc">Use your six numbers to reach the target. The closer you get, the more points you earn.</p>
+    </div>
+
+    <div class="help-divider"></div>
+
+    <div class="help-steps">
+      <div class="help-step">
+        <div class="help-step-num">1</div>
+        <div class="help-step-text">
+          <strong>Tap a number</strong>
+          <span>Pick one of your six gold tiles to start</span>
+        </div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">2</div>
+        <div class="help-step-text">
+          <strong>Tap an operator</strong>
+          <span>Choose + − × ÷</span>
+        </div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">3</div>
+        <div class="help-step-text">
+          <strong>Tap a second number</strong>
+          <span>The result appears as a new green tile — tap it to reuse it</span>
+        </div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-num">4</div>
+        <div class="help-step-text">
+          <strong>Hit Submit</strong>
+          <span>When you're as close as you can get</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-divider"></div>
+
+    <div class="help-rules">
+      <div class="help-rule">✕ &nbsp;Division must give a whole number</div>
+      <div class="help-rule">✕ &nbsp;Results must be positive</div>
+      <div class="help-rule">✓ &nbsp;You don't have to use all six numbers</div>
+      <div class="help-rule">✓ &nbsp;New puzzle every day</div>
+    </div>
+
+    <div class="help-divider"></div>
+
+    <div class="help-scoring">
+      <div class="help-score-row"><span class="help-score-badge exact">Exact</span><span class="help-score-pts">10 pts</span></div>
+      <div class="help-score-row"><span class="help-score-badge close">Within 5</span><span class="help-score-pts">7 pts</span></div>
+      <div class="help-score-row"><span class="help-score-badge near">Within 10</span><span class="help-score-pts">5 pts</span></div>
+      <div class="help-score-row"><span class="help-score-badge miss">More than 10</span><span class="help-score-pts">0 pts</span></div>
+    </div>
+
+    <button class="auth-submit-btn" id="helpPlayBtn" style="margin-top:20px; margin-bottom:0;">Got it — let's play</button>
+
   </div>
 </div>
 
